@@ -69,25 +69,8 @@ INV(self.total)=
    self.total = \sum c : c in (self.N x self.N) : self.model[i][j].color!=GRAY
 '''
         
-import tkinter as tk
-from enum import Enum
-from tkinter import simpledialog,Toplevel
-
-# Enumeraton is important!
-class COLOR(Enum):
-    GRAY = 0
-    BLUE = 1
-    RED = 2
-    def succ(self):
-        return COLOR((self.value+1)%3)
-
-class CARDINAL(Enum):
-    NORTH = 0
-    EAST = 1
-    SOUTH = 2
-    WEST = 3
-    def opposite(self):
-        return CARDINAL((self.value +2 )%4)
+from color import COLOR
+from cardinal import CARDINAL
 
 
 
@@ -156,7 +139,6 @@ class CellModel:
             previous.neighboors[towards.opposite()]['scope'] + 1
         )
         self.scope=sum([self.neighboors[cardinal]['scope'] for cardinal in CARDINAL])
-        self.dot!=None and self.dot.drawi(self)
         #Restore INV(self.pending)
         if self.sticky:
             if (self.scope==self.goal): 
@@ -168,11 +150,13 @@ class CellModel:
                 if (self.scope>0):
                     self.parent.pending.discard((self.i,self.j))
                 else:
-                    self.parent.pending.add((self.i,self.j))
+                    self.parent.pending.add((self.i,self.j))                   
         #Broad cast
         next = self.neighboors[towards]['node']
+        self.dot!=None and self.dot.drawi(self)
         next != None and next.color == COLOR.BLUE and next.propagate(towards,self)
 
+        
         
 class AppModel():
     # POST : INV
@@ -220,90 +204,3 @@ class AppModel():
 #        print('RAFA',self.pending)
         self.update(view)
                                  
-class CellCanvas(tk.Canvas):
-    def __init__(self,root,  **kwargs):
-        tk.Canvas.__init__(self,root,kwargs)
-        self.height = self.winfo_reqheight()
-        self.width = self.winfo_reqwidth()
-        self.scope_id = None
-        self.font = ('Times','15','bold italic')
-
-    def drawi(self,model):
-        x1,y1 = self.width/2,self.height/2
-        self.create_oval(x1-(x1-2),y1-(y1-2),
-                        x1+(x1-2),y1+(y1-2),
-                        fill=model.color.name,
-                        outline="#f00")
-        if model.sticky:
-            self.delete(self.scope_id)
-            text = (str(model.scope)+'/'+str(model.goal) if model.color == COLOR.BLUE
-                    else 'LOCK')
-            self.scope_id = self.create_text(x1,y1,
-                                                font=self.font,fill='#fff',
-                                                text=text)
-    
-class Application(tk.Frame):
-    def __init__(self, appmodel,master=None):
-        tk.Frame.__init__(self, master)
-        self.font=('Times','24','bold italic')
-        self.appmodel = appmodel
-        self.initUI()
-        self.grid(sticky=tk.E+tk.W+tk.S+tk.N)
-        self.appmodel.update(self)
-
-
-
-    def initUI(self):
-        
-        self.lbl0 = tk.Label(self,font=self.font )
-        self.lbl0.grid(sticky=tk.W, row=0, columnspan=4, pady=4, padx=5)
-        
-        cellFrame = tk.Frame(self)
-        cellFrame.grid(row=1, column=0,
-                       columnspan=self.appmodel.N, rowspan=self.appmodel.N,
-                       sticky=tk.E+tk.W+tk.S+tk.N)
-
-        self.dot = []
-        for i in range(0,self.appmodel.N):
-            self.dot.append([None]*self.appmodel.N)
-            for j in range(0,self.appmodel.N):
-                dim = (150/self.appmodel.N)*4
-                self.dot[i][j] = CellCanvas(cellFrame, bg='white', width=dim, height=dim)
-                self.appmodel.model[i][j].dot = self.dot[i][j]
-                self.dot[i][j].drawi(self.appmodel.model[i][j])
-                self.dot[i][j].grid(row=i,column=j)
-                def handler(event,self=self,i=i,j=j): # Trick. See *
-                    return self.__buttonHandler(event,i,j)
-                self.dot[i][j].bind('<Button-1>',handler)
-
-        self.lbl1 = tk.Label(self, font=self.font )
-        self.lbl1.grid(sticky=tk.W, row=self.appmodel.N+1, columnspan=4, pady=4, padx=5)
-
-        
-# * import partial from functiontools to implement closures...
-
-    # Controller action
-    # Model is accesed
-    def __buttonHandler(self,event,i,j):
-        if (self.appmodel.model[i][j].sticky == True):
-            self.bell()
-        else:
-            self.appmodel.fireChange(i,j,self)
-        
-def main():
-    root = tk.Tk()
-    root.title("OhnO game")
-    root.resizable(0,0)
-    root.withdraw()
-    answer = simpledialog.askinteger("Input", "Enter length of matrix (3-23)",
-                                     parent=root,
-                                     minvalue=3, maxvalue=23,
-                                     initialvalue=3)
-    if (answer != None):
-        root.deiconify()
-        appModel = AppModel(answer)
-        app = Application(appModel,root)
-        app.mainloop()
-        
-if __name__ == "__main__":
-    main()
