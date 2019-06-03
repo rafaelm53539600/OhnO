@@ -9,17 +9,19 @@ class CellCanvas(tk.Canvas):
         self.scope_id = None
         self.font = ('Times','15','bold italic')
 
-    def drawi(self,model):
-        x1,y1 = self.width/2,self.height/2
-        self.create_oval(x1-(x1-2),y1-(y1-2),
-                        x1+(x1-2),y1+(y1-2),
+    def draw(self,model,outline=''):
+        w,h = self.width/2,self.height/2
+        b = (2 if outline=='' else 4)
+        self.create_oval(w-(w-b),h-(h-b),
+                        w+(w-b),h+(h-b),
                         fill=model.color.name,
-                        outline="#f00")
-        if model.sticky:
+                         width=5+b,
+                         outline=outline)
+        if model.sticky :
             self.delete(self.scope_id)
             text = (str(model.scope)+'/'+str(model.goal) if model.color == COLOR.BLUE
                     else 'LOCK')
-            self.scope_id = self.create_text(x1,y1,
+            self.scope_id = self.create_text(w,h,
                                                 font=self.font,fill='#fff',
                                                 text=text)
     
@@ -31,6 +33,9 @@ class Application(tk.Frame):
         self.initUI()
         self.grid(sticky=tk.E+tk.W+tk.S+tk.N)
         self.appmodel.update(self)
+
+        #Transient values for pending dots
+#        self.i, self.j, self.id = None, None, None
 
 
 
@@ -51,7 +56,7 @@ class Application(tk.Frame):
                 dim = (150/self.appmodel.N)*4
                 self.dot[i][j] = CellCanvas(cellFrame, bg='white', width=dim, height=dim)
                 self.appmodel.model[i][j].dot = self.dot[i][j]
-                self.dot[i][j].drawi(self.appmodel.model[i][j])
+                self.dot[i][j].draw(self.appmodel.model[i][j])
                 self.dot[i][j].grid(row=i,column=j)
                 def handler(event,self=self,i=i,j=j): # Trick. See *
                     return self.__buttonHandler(event,i,j)
