@@ -16,7 +16,7 @@ def main():
     answer = simpledialog.askinteger("Input", "Enter length of matrix (3-23)",
                                      parent=root,
                                      minvalue=3, maxvalue=23,
-                                     initialvalue=3)
+                                     initialvalue=5)
     if (answer != None):
         root.deiconify()
         appModel = AppModel(answer)
