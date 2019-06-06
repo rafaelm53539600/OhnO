@@ -53,17 +53,17 @@ INV(self.model[i][j].neigh.c.scope) =
   : self.color = RED | GRAY  
        self.model[i][j].neigh.c.scope)=-1
   : self.color = BLUE:
-     self.model[i][j].neigh.oposit(self.neigh.card).node == None
-       self.model[i][j].neigh.(self.neigh.card).scope)=0
-     self.model[i][j].neigh.oposit(self.neigh.card).node != None
-       self.model[i][j].neigh.(self.neigh.card).scope)=
+     : self.model[i][j].neigh.oposit(self.neigh.card).node == None
+       self.model[i][j].neigh.(self.neigh.card).scope)==0
+     : self.model[i][j].neigh.oposit(self.neigh.card).node != None
+       self.model[i][j].neigh.(self.neigh.card).scope)==
                self.prev(oposit(self.neigh.card)).scope + 1 
 
 INV(self.pending)=
-   :self.model[i][j].color = BLUE and self.model[i][j].sticky 
-      self.model[i][j].scope == self.model[i][j].goal <-> (i,j) \not in pending
+   :self.model[i][j].color == BLUE and self.model[i][j].sticky 
+    : self.model[i][j].scope == self.model[i][j].goal <-> (i,j) \not in pending
    :self.model[i][j].color = BLUE and !self.model[i][j].sticky 
-      self.model[i][j].scope > 0 <-> (i,j) \not in pending              
+    : self.model[i][j].scope > 0 <-> (i,j) \not in pending              
 
 INV(self.total)=
    self.total = \sum i,j : (i,j) in (self.N x self.N) : self.model[i][j].color!=GRAY
@@ -182,6 +182,12 @@ class AppModel():
         self.pending = set()
         #Assert all INV
         # ALl GRAY
+        #Transient values for active pending
+        self.faulty=None
+
+    # Pre: All Inv
+    # Post: All Inv
+    def scramble(self):
         for i in range(self.N):
             for j in range(self.N):
                 self.model[i][j].fireChange() #blue
@@ -209,9 +215,7 @@ class AppModel():
                     self.model[i][j].fireChange()
                     if (self.model[i][j].color==COLOR.RED):
                         self.model[i][j].fireChange()
-        #Transient values for active pending
-        self.faulty=None
-
+        
     def update(self,view):
         text1 = str(((1.0*self.total)/(self.N*self.N))*100)[:3]+'%'
         text0=str(self.N)+' X '+str(self.N)

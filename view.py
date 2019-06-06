@@ -34,10 +34,6 @@ class Application(tk.Frame):
         self.grid(sticky=tk.E+tk.W+tk.S+tk.N)
         self.appmodel.update(self)
 
-        #Transient values for pending dots
-#        self.i, self.j, self.id = None, None, None
-
-
 
     def initUI(self):
         

@@ -20,6 +20,7 @@ def main():
     if (answer != None):
         root.deiconify()
         appModel = AppModel(answer)
+        appModel.scramble()
         app = Application(appModel,root)
         app.mainloop()
         
