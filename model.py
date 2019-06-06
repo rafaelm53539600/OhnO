@@ -66,7 +66,7 @@ INV(self.pending)=
       self.model[i][j].scope > 0 <-> (i,j) \not in pending              
 
 INV(self.total)=
-   self.total = \sum c : c in (self.N x self.N) : self.model[i][j].color!=GRAY
+   self.total = \sum i,j : (i,j) in (self.N x self.N) : self.model[i][j].color!=GRAY
 
 '''
 
@@ -76,27 +76,28 @@ from cardinal import CARDINAL
 from random import Random
 
 
-lot=Random()
 class CellModel:
-    # dot is None when not references a view.
-    def __init__(self,parent,i,j):
-        self.parent=parent    #Needed to update global
+    # self.parent reference breaks decoupling (shortcut)
+    # Distributed algorithm results more simple
+    def __init__(self,parent,i,j,view=None):
+        self.parent=parent    
         self.color = COLOR.GRAY
         self.sticky = False
         self.i = i
         self.j = j
-        self.dot = None
-
-    def stick(self,color):
-        self.sticky = False
         self.goal = None
-        self.fireChange() # One shot for Blue
-        if (color == COLOR.RED):
-            self.fireChange() # two shots for Red
+        self.dot = view
+        # TODO
 
+    #Pre : TODO
+    def stick(self):
+        self.sticky = True
+        self.goal = self.scope
 
+        
     #O(4n) !!. vs. O(n^3)
-    # Pre: self.sticky = False and INV(self.card.scope)
+    # Pre: all INV
+    # Post: all INV
     def fireChange(self):
         self.color = self.color.succ()
         #Restoring INV(self.neigh.card.scope)
@@ -114,7 +115,6 @@ class CellModel:
                              self.parent.total - 1  if (self.color == COLOR.GRAY) else
                              self.parent.total)
         #Restore INV(self.pending)
-        # Assert self.sticky == False
         if (self.color == COLOR.BLUE):
             if (self.scope>0):
                 self.parent.pending.discard((self.i,self.j))
@@ -131,8 +131,8 @@ class CellModel:
         return
 
     '''
-    Pre : self.color = BLUE and INV(parent.pending)!!
-    Post: INV(parent.pending)
+    Pre : self.color = BLUE and all INV
+    Post: all INV
     '''
     def propagate(self,towards,previous):
         #Restoring INV(self.neigh.card.scope)            
@@ -181,22 +181,25 @@ class AppModel():
                 }
         self.total = 0
         self.pending = set()
+        #Assert all INV
         # ALl GRAY
         for i in range(self.N):
             for j in range(self.N):
-                self.model[i][j].stick(COLOR(lot.randint(1,2)))
+                self.model[i][j].fireChange() #blue
+                if (Random().randint(0,1)==1):
+                    self.model[i][j].fireChange() #red
 
         for i in range(self.N):
             for j in range(self.N):
                 if (self.model[i][j].color == COLOR.BLUE) and (self.model[i][j].scope==0):
-                    self.model[i][j].fireChange() #to red
+                    self.model[i][j].fireChange() # red
                 
         #Let's do
         for i in range(self.N):
             for j in range(self.N):
-                if (lot.randint(0,1)==0): # stick
-                    self.model[i][j].sticky = True
-                    self.model[i][j].goal = self.model[i][j].scope
+                if (Random().randint(0,1)==0): # stick
+                    self.model[i][j].stick()
+
 
         # Assert solved problem
         
@@ -232,16 +235,3 @@ class AppModel():
         self.faulty = None
         self.model[i][j].fireChange() 
         self.update(view)
-
-
-
-
-
-        
-#blues=[(0,1), (0,2), (1,1)]
-#reds =[(0,0)]
-# for i in blues :
-#     self.model[i[0]][i[1]].stick(COLOR.BLUE)
-# for i in reds :
-#     self.model[i[0]][i[1]].stick(COLOR.RED)
-
