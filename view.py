@@ -7,7 +7,7 @@ class CellCanvas(tk.Canvas):
         self.height = self.winfo_reqheight()
         self.width = self.winfo_reqwidth()
         self.scope_id = None
-        self.font = ('Times','15','bold italic')
+        self.font = ('Times',str(int(self.height/4)),'bold italic')
 
     def draw(self,model,outline=''):
         w,h = self.width/2,self.height/2
@@ -20,7 +20,7 @@ class CellCanvas(tk.Canvas):
         if model.sticky :
             self.delete(self.scope_id)
             text = (str(model.scope)+'/'+str(model.goal) if model.color == COLOR.BLUE
-                    else 'LOCK')
+                    else 'L')
             self.scope_id = self.create_text(w,h,
                                                 font=self.font,fill='#fff',
                                                 text=text)
@@ -53,7 +53,7 @@ class Application(tk.Frame):
         for i in range(0,self.appmodel.N):
             self.dot.append([None]*self.appmodel.N)
             for j in range(0,self.appmodel.N):
-                dim = (150/self.appmodel.N)*4
+                dim = (self.master.winfo_reqheight()/self.appmodel.N)*4
                 self.dot[i][j] = CellCanvas(cellFrame, bg='white', width=dim, height=dim)
                 self.appmodel.model[i][j].dot = self.dot[i][j]
                 self.dot[i][j].draw(self.appmodel.model[i][j])

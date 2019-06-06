@@ -76,7 +76,7 @@ from cardinal import CARDINAL
 from random import Random
 
 
-class CellModel:
+class _CellModel:
     # self.parent reference breaks decoupling (shortcut)
     # Distributed algorithm results more simple
     def __init__(self,parent,i,j,view=None):
@@ -88,7 +88,6 @@ class CellModel:
         self.goal = None
         self.dot = view
         # TODO
-
     #Pre : TODO
     def stick(self):
         self.sticky = True
@@ -164,7 +163,7 @@ class AppModel():
     # POST : INV
     def __init__(self,N):
         self.N = N
-        self.model= [[CellModel(self,i,j) for j in range(N)] for i in range(N) ]
+        self.model= [[_CellModel(self,i,j) for j in range(N)] for i in range(N) ]
         # build the web
         for i in range(N):
             for j in range(N):
