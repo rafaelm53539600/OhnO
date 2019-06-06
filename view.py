@@ -9,14 +9,13 @@ class CellCanvas(tk.Canvas):
         self.scope_id = None
         self.font = ('Times',str(int(self.height/4)),'bold italic')
 
-    def draw(self,model,outline=''):
+    def draw(self,model,bg='white'):
         w,h = self.width/2,self.height/2
-        b = (2 if outline=='' else 4)
-        self.create_oval(w-(w-b),h-(h-b),
-                        w+(w-b),h+(h-b),
+        self.config(bg=bg)
+        self.create_oval(w-(w-2),h-(h-2),
+                        w+(w-2),h+(h-2),
                         fill=model.color.name,
-                         width=5+b,
-                         outline=outline)
+                        outline='')
         if model.sticky :
             self.delete(self.scope_id)
             text = (str(model.scope)+'/'+str(model.goal) if model.color == COLOR.BLUE

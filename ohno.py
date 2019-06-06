@@ -13,7 +13,8 @@ def main():
     ws = root.winfo_screenwidth() # width of the screen
     hs = root.winfo_screenheight() # height of the screen
     root.withdraw()
-    answer = simpledialog.askinteger("Input", "Enter length of matrix (3-23)",
+    answer = simpledialog.askinteger("Input",
+                                     "Enter length of matrix (3-23)",
                                      parent=root,
                                      minvalue=3, maxvalue=23,
                                      initialvalue=5)
