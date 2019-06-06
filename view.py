@@ -48,7 +48,7 @@ class Application(tk.Frame):
         for i in range(0,self.appmodel.N):
             self.dot.append([None]*self.appmodel.N)
             for j in range(0,self.appmodel.N):
-                dim = (self.master.winfo_reqheight()/self.appmodel.N)*4
+                dim = (self.master.winfo_reqheight()/self.appmodel.N)*3 # geometry??
                 self.dot[i][j] = CellCanvas(cellFrame, bg='white', width=dim, height=dim)
                 self.appmodel.model[i][j].dot = self.dot[i][j]
                 self.dot[i][j].draw(self.appmodel.model[i][j])
