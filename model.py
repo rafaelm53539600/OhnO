@@ -183,7 +183,7 @@ class AppModel():
         #Assert all INV
         # ALl GRAY
         #Transient values for active pending
-        self.faulty=None
+        self.faulty=[]
 
     # Pre: All Inv
     # Post: All Inv
@@ -222,10 +222,11 @@ class AppModel():
         if (self.total == self.N*self.N):
             if (len(self.pending)>0):
 #                print(self.pending)
-                faulty=self.pending.copy().pop()
-                self.faulty = self.model[faulty[0]][faulty[1]]
-                self.faulty.dot.draw(self.faulty,'black')
-                text0='Check '+str(faulty)
+                faulty=list(self.pending.copy())[ :5] #O(1)
+                self.faulty = [ self.model[i[0]][i[1]] for i in faulty ]
+                for f in self.faulty:
+                    f.dot.draw(f,'black')
+                text0='Check '+str(faulty) + '...'
             else:
                 text0='SOLVED!'
         view.lbl0.config(text=text0)
@@ -234,7 +235,8 @@ class AppModel():
                                  
         
     def fireChange(self,i,j,view):
-        self.faulty!=None and self.faulty.dot.draw(self.faulty)
-        self.faulty = None
+        for f in self.faulty:
+            f.dot.draw(f)
+        self.faulty = []
         self.model[i][j].fireChange() 
         self.update(view)
